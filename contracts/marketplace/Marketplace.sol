@@ -98,10 +98,7 @@ contract Marketplace is Ownable {
         return (feeRate * _order.price) / 10**(feeDecimal + 2);
     }
 
-    function isSeller(uint256 orderId_, address seller_)
-        public
-        view
-        returns (bool)
+    function isSeller(uint256 orderId_, address seller_) public view returns (bool)
     {
         return orders[orderId_].seller == seller_;
     }
