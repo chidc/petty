@@ -28,27 +28,53 @@ describe("marketplace", function () {
     })
     describe("common", function () {
         it("feeDecimal should return correct value", async function () {
+            expect(await marketplace.feeDecimal()).to.be.equal(defaulFeeDecimal)
         });
         it("feeRate should return correct value", async function () {
+            expect(await marketplace.feeRate()).to.be.equal(defaulFeeRate)
         });
         it("feeRecipient should return correct value", async function () {
+            expect(await marketplace.feeRecipient()).to.be.equal(feeRecipient.address)
         });
     })
     describe("updateFeeRecipient", function () {
         it("should revert if feeRecipient is address 0", async function () {
+            await expect(marketplace.updateFeeRecipient(address0))
+                .to
+                .be
+                .revertedWith("NFTMarketplace: feeRecipient_ is zero address")
         });
         it("should revert if sender isn't contract owner", async function () {
+            await expect(marketplace.connect(buyer).updateFeeRecipient(address0))
+                .to
+                .be
+                .revertedWith("Ownable: caller is not the owner")
         });
         it("should update correctly", async function () {
+            await marketplace.updateFeeRecipient(buyer.address)
+            expect(await marketplace.feeRecipient()).to.be.equal(buyer.address)
         });
     })
 
     describe("updateFeeRate", function () {
         it("should revert if fee rate >= 10^(feeDecimal+2)", async function () {
+            await expect(marketplace.updateFeeRate(0, 100))
+                .to
+                .be
+                .revertedWith("NFTMarketplace: bad fee rate")
         });
         it("should revert if sender isn't contract owner", async function () {
+            await expect(marketplace.connect(buyer).updateFeeRate(0, 10))
+                .to
+                .be
+                .revertedWith("Ownable: caller is not the owner")
         });
         it("should update correctly", async function () {
+            const updateFeeRateTx = await marketplace.updateFeeRate(0, 20)
+            expect(await marketplace.feeDecimal()).to.be.equal(0)
+            expect(await marketplace.feeRate()).to.be.equal(20)
+            await expect(updateFeeRateTx).to.be.emit(marketplace, "FeeRateUpdated")
+                .withArgs(0, 20)
         });
     })
     describe("addPaymentToken", function () {
